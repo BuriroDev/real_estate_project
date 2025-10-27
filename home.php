@@ -1,13 +1,22 @@
   <?php
   session_start();
-  if(!isset($_SESSION['login'])){
+  if (!isset($_SESSION['login'])) {
     header('location: index.php');
   }
 
   require "db.php";
   include "header.php";
-  
-  $sql = "SELECT * FROM sell_property";
+
+  $sql = "SELECT * FROM sell_property WHERE 1=1";
+  $search = $_GET['search'] ?? '';
+
+  if (!empty($search)) {
+    $sql .= " AND (city LIKE '%$search%' 
+                     OR location LIKE '%$search%' 
+                     OR price LIKE '%$search%' 
+                     OR details LIKE '%$search%')";
+  }
+
   $result = mysqli_query($conn, $sql);
 
   ?>
@@ -16,30 +25,30 @@
     <div class="hero-slide">
       <div
         class="img overlay"
-        style="background-image: url('images/hero_bg_3.jpg')"></div>
+        style="background-image: url('./uploads/1761564658_Independent-House-for-Sale-in-Narapally-Hyderabad.jpg')"></div>
       <div
         class="img overlay"
-        style="background-image: url('images/hero_bg_2.jpg')"></div>
+        style="background-image: url('./uploads/1761564709_7b22791aaece53a58fd1418ab6b078db.jpg')"></div>
       <div
         class="img overlay"
-        style="background-image: url('images/hero_bg_1.jpg')"></div>
+        style="background-image: url('./uploads/1761309915_17006255_1398822586804436_1005537883_n.jpg')"></div>
     </div>
 
     <div class="container">
       <div class="row justify-content-center align-items-center">
         <div class="col-lg-9 text-center">
           <h1 class="heading" data-aos="fade-up">
-            Easiest way to find your dream home
+            Find your dream home in Pakistan
           </h1>
           <form
-            action="#"
+            method="GET"
             class="narrow-w form-search d-flex align-items-stretch mb-3"
             data-aos="fade-up"
             data-aos-delay="200">
             <input
               type="text"
               class="form-control px-4"
-              placeholder="Your ZIP code or City. e.g. New York" />
+              placeholder="City. e.g. Karachi" name="search" />
             <button type="submit" class="btn btn-primary">Search</button>
           </form>
         </div>
@@ -58,8 +67,7 @@
         <div class="col-lg-6 text-lg-end">
           <p>
             <a
-              href="#"
-              target="_blank"
+              href="properties.php"
               class="btn btn-primary text-white py-3 px-4">View all properties</a>
           </p>
         </div>
@@ -69,35 +77,38 @@
           <div class="property-slider-wrap">
             <div class="property-slider">
 
-            <?php while($row = $result->fetch_assoc()) : ?>
-              <div class="property-item">
-                <a href="property-single.html" class="img">
-                  <img src="uploads/<?= $row['picture'] ?>" alt="Image" class="img-fluid" />
-                </a>
+              <?php while ($row = $result->fetch_assoc()) : ?>
+                <div class="property-item">
+                  <a href="property-single.php?id=<?= $row['id'] ?>&uid=<?= $row['posted_by'] ?>" class="img">
+                    <img src="uploads/<?= $row['picture'] ?>" alt="Image" class="img-fluid" />
+                  </a>
 
-                <div class="property-content">
-                  <div class="price mb-2"><span><?= $row['price'] ?></span></div>
-                  <div>
-                    <span class="d-block mb-2 text-black-50"><?= $row['location'] ?></span>
-                    <span class="city d-block mb-3"><?= $row['city'] ?></span>
+                  <div class="property-content">
+                    <?php if ($row['status'] == "sold") : ?>
+                      <img src="./sold.png" alt="" width="50px" style="float: right;">
+                    <?php endif; ?>
+                    <div class="price mb-2"><span><?= $row['price'] ?></span></div>
+                    <div>
+                      <span class="d-block mb-2 text-black-50"><?= $row['location'] ?></span>
+                      <span class="city d-block mb-3"><?= $row['city'] ?></span>
 
-                    <div class="specs d-flex mb-4">
-                      <span class="d-block d-flex align-items-center me-3">
-                        <span class="icon-bed me-2"></span>
-                        <span class="caption"><?= $row['bedroom'] ?> beds</span>
-                      </span>
-                      <span class="d-block d-flex align-items-center">
-                        <span class="icon-bath me-2"></span>
-                        <!-- <span class="caption">2 baths</span> -->
-                      </span>
+                      <div class="specs d-flex mb-4">
+                        <span class="d-block d-flex align-items-center me-3">
+                          <span class="icon-bed me-2"></span>
+                          <span class="caption"><?= $row['bedroom'] ?> beds</span>
+                        </span>
+                        <span class="d-block d-flex align-items-center">
+                          <span class="icon-bath me-2"></span>
+                          <!-- <span class="caption">2 baths</span> -->
+                        </span>
+                      </div>
+
+                      <a
+                        href="property-single.php?id=<?= $row['id'] ?>&uid=<?= $row['posted_by'] ?>"
+                        class="btn btn-primary py-2 px-3">See details</a>
                     </div>
-
-                    <a
-                      href="property-single.html"
-                      class="btn btn-primary py-2 px-3">See details</a>
                   </div>
                 </div>
-              </div>
               <?php endwhile; ?>
               <!-- .item -->
             </div>

@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <title>
-    Property &mdash; Free Bootstrap 5 Website Template by Untree.co
+    Real Estate Management
   </title>
 
   <style>
@@ -79,7 +79,7 @@
                 <a href="properties.php">User Info</a>
                 <ul class="dropdown">
                   <li><a href="#">Profile</a></li>
-                  <li><a href="#">Orders</a></li>
+                  <li><a href="myPurchase.php">My Purchases</a></li>
                 </ul>
               </li>
             </ul>

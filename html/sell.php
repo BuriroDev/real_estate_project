@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     </div>
     <div class="col-12">
         <label class="form-label">Price</label>
-        <input type="number" name="price" class="form-control" placeholder="Apartment, studio, or floor">
+        <input type="number" name="price" class="form-control" placeholder="In PKR">
     </div>
     <div class="col-md-6">
         <label class="form-label">City</label>
