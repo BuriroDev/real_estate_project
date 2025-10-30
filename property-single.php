@@ -4,9 +4,10 @@
     header('location: index.php');
   }
 
-  $id = $_GET['id'];
-  $uid = $_GET['uid'];
+  $id = $_GET['id'] ?? "";
+  $uid = $_GET['uid'] ?? "";
   $userId = $_SESSION['user_id'];
+  $message = "";
 
   require "db.php";
   include "header.php";
@@ -19,20 +20,31 @@
 
   if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $price = $_POST['price'];
-    $product_id = $_POST['product_id'];
+    $property_id = $_POST['product_id'];
 
-    $sql = "INSERT INTO buy_property(buyer, seller, price, proper_id) VALUES($userId, $uid, $price, $product_id)";
-    if (mysqli_query($conn, $sql)) {
+    $sql = "SELECT * FROM buy_property WHERE proper_id = $property_id AND buyer = $userId";
+    if (mysqli_query($conn, $sql)->num_rows > 0) {
       echo "<script>
             Swal.fire({
-            icon: 'success',
-            title: 'Request Sent!',
-            text: 'Buy request has been sent',
-            }).then(() => {
-                 window.location.href = 'property-single.php'; 
-             });
-            </script>
+            icon: 'info',
+            title: 'Offer already sent!',
+            text: 'Offer has been sent now wait for seller reply!',
+          });
+        </script>
         ";
+    } else {
+      $sql = "INSERT INTO buy_property(buyer, seller, price, proper_id) VALUES($userId, $uid, $price, $property_id)";
+      if (mysqli_query($conn, $sql)) {
+        header("location: checkout.php");
+        //       echo "<script>
+        //     Swal.fire({
+        //     icon: 'success',
+        //     title: 'Offer sent!',
+        //     text: 'Buy request has been sent to seller!',
+        //   });
+        // </script>
+        // ";
+      }
     }
   }
   ?>
@@ -82,10 +94,11 @@
             <div class="img-property-slide-wrap">
               <div class="img-property-slide">
                 <img src="./uploads/<?= $row['picture'] ?>" alt="Image" class="img-fluid" />
-                <!-- <img src="images/<?= $row['picture'] ?>" alt="Image" class="img-fluid" />
-                <img src="images/<?= $row['picture'] ?>" alt="Image" class="img-fluid" /> -->
               </div>
-              <h1 class="text-danger"><?= "Rs." . $row['price'] . "/-"  ?></h1>
+              <h1 class="text-danger"><?= "Rs." . number_format($row['price'], 2) . "/-"  ?></h1>
+              <?php if ($row['status'] != "available") : ?>
+                <img src="./sold-out-png-4.png" alt="sold" width="400px">
+              <?php endif; ?>  
             </div>
             <div class="col-md-6">
               <?php if ($row['status'] == "available") : ?>
@@ -93,7 +106,7 @@
                   <label class="form-label">Price</label>
                   <input type="number" name="price" class="form-control mb-2">
                   <input type="hidden" name="product_id" value='<?= $row['id'] ?>'>
-                  <button type="submit" class="btn btn-primary">Request Buy</button>
+                  <button type="submit" class="btn btn-primary">Buy Request</button>
                 </form>
               <?php endif; ?>
             </div>

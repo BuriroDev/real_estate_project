@@ -45,6 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
 
 ?>
+<div class="row mb-5 align-items-center">
+    <div class="col-lg-6">
+        <h2 class="font-weight-bold text-primary heading">
+            List your Property
+        </h2>
+    </div>
+</div>
 
 <form method="POST" enctype="multipart/form-data" class="row g-3">
     <div class="col-md-6">

@@ -60,7 +60,7 @@
                     <?php if ($row['status'] == "sold") : ?>
                       <img src="./sold.png" alt="" width="50px" style="float: right;">
                     <?php endif; ?>
-                    <div class="price mb-2"><span><?= $row['price'] ?></span></div>
+                    <div class="price mb-2"><span><?= number_format($row['price'], 2) ?> PKR</span></div>
                     <div>
                       <span class="d-block mb-2 text-black-50"><?= $row['location'] ?></span>
                       <span class="city d-block mb-3"><?= $row['city'] ?></span>
@@ -68,11 +68,7 @@
                       <div class="specs d-flex mb-4">
                         <span class="d-block d-flex align-items-center me-3">
                           <span class="icon-bed me-2"></span>
-                          <span class="caption"><?= $row['bedroom'] ?> beds</span>
-                        </span>
-                        <span class="d-block d-flex align-items-center">
-                          <span class="icon-bath me-2"></span>
-                          <!-- <span class="caption">2 baths</span> -->
+                          <span class="caption"><?= $row['bedroom'] ?> bedroom</span>
                         </span>
                       </div>
 

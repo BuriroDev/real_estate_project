@@ -19,6 +19,16 @@
 
   $result = mysqli_query($conn, $sql);
 
+  if (isset($_GET['paid'])) {
+    echo "<script>
+            Swal.fire({
+            icon: 'success',
+            title: 'Payment Paid!',
+            text: 'Payment has been successfully paid!',
+          });
+        </script>";
+  }
+
   ?>
 
   <div class="hero">
@@ -28,12 +38,16 @@
         style="background-image: url('./uploads/1761564658_Independent-House-for-Sale-in-Narapally-Hyderabad.jpg')"></div>
       <div
         class="img overlay"
-        style="background-image: url('./uploads/1761564709_7b22791aaece53a58fd1418ab6b078db.jpg')"></div>
+        style="background-image: url('./uploads/1761570309_1627647864-Artboard\ 1\ copy\ 39.jpg')"></div>
       <div
         class="img overlay"
         style="background-image: url('./uploads/1761309915_17006255_1398822586804436_1005537883_n.jpg')"></div>
     </div>
 
+
+    <div class="alert alert-success" style="margin-top: 120px; margin-left:20px; width:250px; float:left;" id="login-alert" role="alert">
+      Welcome Back! <?= $_SESSION['name'] ?>
+    </div>
     <div class="container">
       <div class="row justify-content-center align-items-center">
         <div class="col-lg-9 text-center">
@@ -87,7 +101,7 @@
                     <?php if ($row['status'] == "sold") : ?>
                       <img src="./sold.png" alt="" width="50px" style="float: right;">
                     <?php endif; ?>
-                    <div class="price mb-2"><span><?= $row['price'] ?></span></div>
+                    <div class="price mb-2"><span><?= number_format($row['price'], 2) ?> PKR</span></div>
                     <div>
                       <span class="d-block mb-2 text-black-50"><?= $row['location'] ?></span>
                       <span class="city d-block mb-3"><?= $row['city'] ?></span>
@@ -95,11 +109,7 @@
                       <div class="specs d-flex mb-4">
                         <span class="d-block d-flex align-items-center me-3">
                           <span class="icon-bed me-2"></span>
-                          <span class="caption"><?= $row['bedroom'] ?> beds</span>
-                        </span>
-                        <span class="d-block d-flex align-items-center">
-                          <span class="icon-bath me-2"></span>
-                          <!-- <span class="caption">2 baths</span> -->
+                          <span class="caption"><?= $row['bedroom'] ?> bedroom</span>
                         </span>
                       </div>
 
@@ -552,3 +562,10 @@
   </div>
 
   <?php include "footer.php"; ?>
+
+  <script>
+    setTimeout(() => {
+      const alert = document.getElementById('login-alert');
+      if (alert) alert.style.display = 'none';
+    }, 5000);
+  </script>

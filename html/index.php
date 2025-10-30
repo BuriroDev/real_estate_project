@@ -1,11 +1,12 @@
 <?php
 session_start();
 if (!isset($_SESSION['login'])) {
-  header('location: index.php');
+  header('location: ../index.php');
 }
 
 include "../html/header.php";
 require "../db.php";
+
 $uid = $_SESSION['user_id'];
 
 $sold_sql = "SELECT COUNT(*) AS TOTAL FROM sell_property WHERE status = 'sold' AND posted_by = $uid";
@@ -13,18 +14,111 @@ $result = mysqli_query($conn, $sold_sql)->fetch_assoc();
 $sold = $result['TOTAL'];
 
 $avail_sql = "SELECT COUNT(*) AS STILL FROM sell_property WHERE status = 'available' AND posted_by = $uid";
-$result1 = mysqli_query($conn, $sold_sql)->fetch_assoc();
-$avail = $result1['STILL'] ?? "NONE";
+$result1 = mysqli_query($conn, $avail_sql)->fetch_assoc();
+$avail = $result1['STILL'];
+
+$profit_sql = "SELECT SUM(price) AS TOTAL_SOLD FROM buy_property WHERE status = 'accepted' AND seller = $uid";
+$result3 = mysqli_query($conn, $profit_sql)->fetch_assoc();
+$totalSale = $result3['TOTAL_SOLD'] ?? 0;
+
+$top_clients = "SELECT u.*, b.*, b.price AS sold_price, s.*
+                FROM buy_property b 
+                INNER JOIN users u
+                ON b.buyer = u.id
+                INNER JOIN sell_property s
+                ON b.proper_id = s.id
+                WHERE b.seller = $uid AND b.status = 'accepted'
+                ";
+
+$topUsers = mysqli_query($conn, $top_clients);
 ?>
+<div class="row mb-5 align-items-center">
+  <div class="col-lg-6">
+    <h2 class="font-weight-bold text-primary heading">
+      Dashboard
+    </h2>
+  </div>
+</div>
 <!--  Row 1 -->
-<div class="row">
-  <div class="col-lg-8 d-flex align-items-strech">
-    <div class="card w-100">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between mb-1">
-          <div class="">
-            <h5 class="card-title fw-semibold">Profit & Expenses</h5>
+<div class="d-flex gap-5">
+  <div class="row">
+    <div class="row">
+      <div class="col-lg-12 col-sm-6">
+        <!-- Yearly Breakup -->
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-10 fw-semibold">Total Sale</h5>
+            <div class="row align-items-center">
+              <div class="col-7">
+                <h4 class="fw-semibold mb-3">RS. <?= number_format($totalSale, 2) ?> PKR</h4>
+                <div class="d-flex align-items-center mb-2">
+                  <span
+                    class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-arrow-up-left text-success"></i>
+                  </span>
+                  <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                  <p class="fs-3 mb-0">last year</p>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="d-flex justify-content-center">
+                  <div id="grade"></div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+      <div class="col-lg-12 col-sm-6">
+        <!-- Yearly Breakup -->
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-10 fw-semibold">Properties Sold</h5>
+            <div class="row align-items-center">
+              <div class="col-7">
+                <h4 class="fw-semibold mb-3"><?= $sold ?></h4>
+                <div class="d-flex align-items-center mb-2">
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="d-flex justify-content-center">
+                  <div id="grade"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-12 col-sm-6">
+        <!-- Yearly Breakup -->
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-10 fw-semibold">Properties Available</h5>
+            <div class="row align-items-center">
+              <div class="col-7">
+                <h4 class="fw-semibold mb-3"><?= $avail ?></h4>
+                <div class="d-flex align-items-center mb-2">
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="d-flex justify-content-center">
+                  <div id="grade"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-8 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-body p-4">
+        <div class="d-flex mb-4 justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">Recently Purchased Clients</h5>
+
           <div class="dropdown">
             <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
               class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
@@ -41,347 +135,54 @@ $avail = $result1['STILL'] ?? "NONE";
             </ul>
           </div>
         </div>
-        <div id="profit"></div>
-      </div>
-    </div>
-  </div>
-  <div class="col-lg-4">
-    <div class="row">
-      <div class="col-lg-12 col-sm-6">
-        <!-- Yearly Breakup -->
-        <div class="card overflow-hidden">
-          <div class="card-body p-4">
-            <h5 class="card-title mb-10 fw-semibold">Traffic Distribution</h5>
-            <div class="row align-items-center">
-              <div class="col-7">
-                <h4 class="fw-semibold mb-3">$36,358</h4>
-                <div class="d-flex align-items-center mb-2">
-                  <span
-                    class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                    <i class="ti ti-arrow-up-left text-success"></i>
-                  </span>
-                  <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                  <p class="fs-3 mb-0">last year</p>
-                </div>
-                <div class="d-flex align-items-center">
-                  <div class="me-3">
-                    <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                    <span class="fs-2">Oragnic</span>
-                  </div>
-                  <div>
-                    <span class="round-8 bg-danger rounded-circle me-2 d-inline-block"></span>
-                    <span class="fs-2">Refferal</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-5">
-                <div class="d-flex justify-content-center">
-                  <div id="grade"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-6">
-          <!-- Yearly Breakup -->
-          <div class="card overflow-hidden">
-            <div class="card-body p-4">
-              <h5 class="card-title mb-10 fw-semibold">Properties Sold</h5>
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <h4 class="fw-semibold mb-3"><?= $sold ?></h4>
-                  <div class="d-flex align-items-center mb-2">
-                    <span
-                      class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-arrow-up-left text-success"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="fs-3 mb-0">last year</p>
-                  </div>
-                </div>
-                <div class="col-5">
-                  <div class="d-flex justify-content-center">
-                    <div id="grade"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-12 col-sm-6">
-          <!-- Yearly Breakup -->
-          <div class="card overflow-hidden">
-            <div class="card-body p-4">
-              <h5 class="card-title mb-10 fw-semibold">Properties Available</h5>
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <h4 class="fw-semibold mb-3"><?= $avail ?></h4>
-                  <div class="d-flex align-items-center mb-2">
-                    <span
-                      class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-arrow-up-left text-success"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="fs-3 mb-0">last year</p>
-                  </div>
-                </div>
-                <div class="col-5">
-                  <div class="d-flex justify-content-center">
-                    <div id="grade"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-12 col-sm-6">
-          <!-- Monthly Earnings -->
-          <div class="card">
-            <div class="card-body">
-              <div class="row alig n-items-start">
-                <div class="col-8">
-                  <h5 class="card-title mb-10 fw-semibold"> Product Sales</h5>
-                  <h4 class="fw-semibold mb-3">$6,820</h4>
-                  <div class="d-flex align-items-center pb-1">
-                    <span
-                      class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-arrow-down-right text-danger"></i>
-                    </span>
-                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                    <p class="fs-3 mb-0">last year</p>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="d-flex justify-content-end">
-                    <div
-                      class="text-white bg-danger rounded-circle p-6 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-currency-dollar fs-6"></i>
+
+        <div class="table-responsive" data-simplebar>
+          <table class="table table-borderless align-middle text-nowrap">
+            <thead>
+              <tr>
+                <th scope="col">Profile</th>
+                <th scope="col">Name</th>
+                <th scope="col">Occupation</th>
+                <th scope="col">Property Location</th>
+                <th scope="col">Sold Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php while ($row = $topUsers->fetch_assoc()) : ?>
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="me-4">
+                        <img src="../uploads/<?= $row['profile'] ?>" width="50" class="rounded-circle"
+                          alt="" />
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="earning"></div>
-          </div>
+                  </td>
+                  <td>
+                    <p class="fs-3 fw-normal mb-0"><?= $row['name'] ?></p>
+                  </td>
+                  <td>
+                    <p>
+                      <?= $row['occupation'] ?>
+                    </p>
+                  </td>
+                  <td>
+                    <p>
+                      <?= $row['location'] ?>
+                    </p>
+                  </td>
+                  <td>
+                    <p class="fs-3 fw-normal mb-0 text-danger">
+                      <?= $row['sold_price'] ?>
+                    </p>
+                  </td>
+                </tr>
+              <?php endwhile; ?>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-4 d-flex align-items-stretch">
-      <div class="card w-100">
-        <div class="card-body p-4">
-          <div class="mb-4">
-            <h5 class="card-title fw-semibold">Upcoming Schedules</h5>
-          </div>
-          <ul class="timeline-widget mb-0 position-relative mb-n5">
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">09:30</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-2"></span>
-                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1">Payment received from John Doe of $385.90</div>
-            </li>
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">10:00 am</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-info flex-shrink-0 my-2"></span>
-                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
-                  href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-              </div>
-            </li>
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-2"></span>
-                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1">Payment was made of $64.95 to Michael</div>
-            </li>
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-2"></span>
-                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
-                  href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-              </div>
-            </li>
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-2"></span>
-                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New arrival recorded
-              </div>
-            </li>
-            <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-2"></span>
-              </div>
-              <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-8 d-flex align-items-stretch">
-      <div class="card w-100">
-        <div class="card-body p-4">
-          <div class="d-flex mb-4 justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Top Paying Clients</h5>
-
-            <div class="dropdown">
-              <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
-                class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
-                <i class="ti ti-dots-vertical fs-7 d-block"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li>
-                  <a class="dropdown-item" href="#">Another action</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="table-responsive" data-simplebar>
-            <table class="table table-borderless align-middle text-nowrap">
-              <thead>
-                <tr>
-                  <th scope="col">Profile</th>
-                  <th scope="col">Hour Rate</th>
-                  <th scope="col">Extra classes</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="me-4">
-                        <img src="../assets/images/profile/user1.jpg" width="50" class="rounded-circle"
-                          alt="" />
-                      </div>
-
-                      <div>
-                        <h6 class="mb-1 fw-bolder">Mark J. Freeman</h6>
-                        <p class="fs-3 mb-0">Prof. English</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0">$150/hour</p>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0 text-success">
-                      +53
-                    </p>
-                  </td>
-                  <td>
-                    <span
-                      class="badge bg-light-success rounded-pill text-success px-3 py-2 fs-3">Available</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="me-4">
-                        <img src="../assets/images/profile/user2.jpg" width="50" class="rounded-circle"
-                          alt="" />
-                      </div>
-
-                      <div>
-                        <h6 class="mb-1 fw-bolder">Nina R. Oldman</h6>
-                        <p class="fs-3 mb-0">Prof. History</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0">$150/hour</p>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0 text-success">
-                      +68
-                    </p>
-                  </td>
-                  <td>
-                    <span class="badge bg-light-primary rounded-pill text-primary px-3 py-2 fs-3">In
-                      Class</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="me-4">
-                        <img src="../assets/images/profile/user3.jpg" width="50" class="rounded-circle"
-                          alt="" />
-                      </div>
-
-                      <div>
-                        <h6 class="mb-1 fw-bolder">Arya H. Shah</h6>
-                        <p class="fs-3 mb-0">Prof. Maths</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0">$150/hour</p>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0 text-success">
-                      +94
-                    </p>
-                  </td>
-                  <td>
-                    <span class="badge bg-light-danger rounded-pill text-danger px-3 py-2 fs-3">Absent</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="me-4">
-                        <img src="../assets/images/profile/user4.jpg" width="50" class="rounded-circle"
-                          alt="" />
-                      </div>
-
-                      <div>
-                        <h6 class="mb-1 fw-bolder">June R. Smith</h6>
-                        <p class="fs-3 mb-0">Prof. Arts</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0">$150/hour</p>
-                  </td>
-                  <td>
-                    <p class="fs-3 fw-normal mb-0 text-success">
-                      +27
-                    </p>
-                  </td>
-                  <td>
-                    <span class="badge bg-light-warning rounded-pill text-warning px-3 py-2 fs-3">On
-                      Leave</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <?php include "../html/footer.php"; ?>
+</div>
+<?php include "../html/footer.php"; ?>

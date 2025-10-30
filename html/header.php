@@ -111,6 +111,7 @@ $photo = $_SESSION['profile'];
                 <li class="nav-item dropdown">
                   <a class="nav-link " href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                     aria-expanded="false">
+                    <p class="mt-2">Profile</p>
                     <img src="../uploads/<?= htmlspecialchars($photo) ?>" alt="" width="35" height="35"
                       class="rounded-circle">
                   </a>

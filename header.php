@@ -49,27 +49,12 @@
     <div class="container">
       <div class="menu-bg-wrap">
         <div class="site-navigation">
-          <a href="#" class="logo m-0 float-start">Best Property Site in Pakistan</a>
+          <a href="index.php" class="logo m-0 float-start">Best Property Site in Pakistan</a>
 
           <?php if (isset($_SESSION['login'])) : ?>
             <ul
               class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end">
               <li><a href="home.php">Home</a></li>
-              <li class="has-children">
-                <a href="properties.php">Properties</a>
-                <ul class="dropdown">
-                  <li><a href="#">Buy Property</a></li>
-                  <li><a href="#">Sell Property</a></li>
-                  <li class="has-children">
-                    <a href="#">Dropdown</a>
-                    <ul class="dropdown">
-                      <li><a href="#">Sub Menu One</a></li>
-                      <li><a href="#">Sub Menu Two</a></li>
-                      <li><a href="#">Sub Menu Three</a></li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
               <li><a href="services.php">Services</a></li>
               <li><a href="about.php">About</a></li>
               <li class="active"><a href="contact.php">Contact Us</a></li>
@@ -96,3 +81,41 @@
       </div>
     </div>
   </nav>
+
+
+  <!-- PRACTICE -->
+
+  <!-- SELECT 
+  e.name AS employee_name,
+  d.dept_name AS department_name,
+  m.manager_name AS manager_name,
+  p.project_name AS project_name,
+  p.status
+  FROM employees AS e
+  INNER JOIN departments AS d ON e.dept_id =  d.id
+  INNER JOIN managers AS m ON d.manager_id = m.id 
+  LEFT JOIN projects AS p ON p.employee_id = e.id;
+ -->
+
+ <!-- SELECT 
+ cu.name AS customer_name,
+ c.city_name,
+ p.order_id,
+ o.total_amount,
+ p.payment_status
+
+ FROM customers AS cu 
+ INNER JOIN cities AS c ON cu.city_id = c.id
+ LEFT JOIN orders AS o ON o.customer_id = cu.id 
+ LEFT JOIN payments AS p ON p.order_id = o.id; -->
+
+
+
+
+
+
+
+
+
+
+

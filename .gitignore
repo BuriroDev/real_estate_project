@@ -1,0 +1,23 @@
+# Ignore Composer vendor directory
+/vendor/
+
+# Ignore Composer lock file (optional, usually you keep it)
+/composer.lock
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+*.cache
+
+# Ignore IDE/editor files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore node modules if you also use Node.js
+/node_modules/

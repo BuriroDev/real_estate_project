@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         $_SESSION['password'] = $row['password'];
         $_SESSION['role'] = $row['role'];
         $_SESSION['profile'] = $row['profile'];
+        $_SESSION['name'] = $row['name'];
 
         if ($row['role'] === "seller") {
             header("location: html/index.php");

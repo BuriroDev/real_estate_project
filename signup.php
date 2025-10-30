@@ -10,20 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $occupation = $_POST['occupation'];
     $city = $_POST['city'];
 
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $originalName = basename($_FILES['photo']['name']);
-        $fileType = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        $allowedTypes = ['jpg', 'jpeg', 'png'];
+    $originalName = basename($_FILES['photo']['name']);
+    $fileType = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    $allowedTypes = ['jpg', 'jpeg', 'png'];
 
-        $photoName = time() . '_' . $originalName;
-        $uploadDir = 'uploads/';
-        move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $photoName);
-    }
-
-    $emp_sql = "INSERT INTO users(name, occupation, city, profile) VALUES('$name', '$occupation', '$city', '$photoName')";
-    mysqli_query($conn, $emp_sql);
-
-    $id = $conn->insert_id;
+    $photoName = time() . '_' . $originalName;
+    $uploadDir = 'uploads/';
+    move_uploaded_file($_FILES['photo']['tmp_name'], $uploadDir . $photoName);
 
     //CREDENTIALS
     $username = $_POST['username'];
@@ -38,33 +31,42 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     if ($result->num_rows > 0) {
         echo "<script>
             Swal.fire({
-  icon: 'error',
-  title: 'Username Already Taken!',
-  text: 'Please try another username.',
-});
+            icon: 'error',
+            title: 'Username Already Taken!',
+            text: 'Please try another username.',
+          });
         </script>
         ";
     } else {
         if ($password === $confirmPassword) {
+            $emp_sql = "INSERT INTO users(name, occupation, city, profile) VALUES('$name', '$occupation', '$city', '$photoName')";
+            mysqli_query($conn, $emp_sql);
+
+            $id = $conn->insert_id;
+
             $sql = "INSERT INTO user_credentials(username, password, role, user_id) VALUES('$username', '$protectedPassword', '$role', $id)";
 
             if (mysqli_query($conn, $sql)) {
                 echo "<script>
             Swal.fire({
-  icon: 'success',
-  title: 'Account Created!',
-  text: 'User have been registered.',
-});
+            icon: 'success',
+            title: 'Account Created!',
+            text: 'User have been registered.',
+            }).then(() => {
+                window.location.href = 'index.php'; 
+            });
         </script>
         ";
             }
         } else {
             echo "<script>
             Swal.fire({
-        icon: 'info',
-  title: 'Password did match!',
-  text: 'Please enter both passwords correctly',
-});
+            icon: 'info',
+             title: 'Password did match!',
+             text: 'Please enter both passwords correctly',
+         }).then(() => {
+             window.location.href = 'signup.php'; 
+         });
         </script>
         ";
         }
@@ -73,8 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 ?>
 
 <div class="bg-gradient-primary">
-
+    
     <div class="container" style="margin-top: 100px;">
+        <a href="index.php" class="btn btn-secondary">Back</a>
 
         <!-- Centered Form -->
         <div class="row justify-content-center">
@@ -133,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                         </form>
                         <hr>
                         <div class="text-center">
-                            <a class="small" href="login.php">Already have an account? Login!</a>
+                            <a class="small" href="index.php">Already have an account? Login!</a>
                         </div>
                     </div>
                 </div>
